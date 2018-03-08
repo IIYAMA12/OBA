@@ -284,9 +284,7 @@ window.addEventListener("load", ((e) => {
 
 
         map.element.on("dblclick", function (e) {
-            // console.log("click", e, e.lngLat.toString()); // e.containerPoint.toString() + ', ' + e.latlng.toString()
             map.load.data(e.lngLat.lng, e.lngLat.lat);
-            // console.log("click");
         });
 
         let focusedOnId;
