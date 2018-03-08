@@ -24,9 +24,15 @@ body > header {
 }
 
 main {
-    display: grid;
-    grid-template-columns: 70% auto;
     height: calc(100vh - 2rem);
+    position: relative;
+}
+
+@media (min-width: 35rem) {
+    main {
+        display: grid;
+        grid-template-columns: 70% auto;
+    }
 }
 
 #map {
@@ -36,7 +42,35 @@ main {
 
 #map-information {
     height: inherit;
-    overflow-x: hidden;
+}
+
+@media (max-width: 35rem) {
+    #map-information {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 20%;
+        background-color: rgba(255, 255, 255, 0.4);
+        height: calc(100vh - 4rem - 1px);
+        color: white;
+    }
+    #map-information figcaption {
+        display: none;
+        visibility: hidden;
+    }
+    #map-information h2 {
+        box-sizing: border-box;
+        position: absolute;
+        right: 100%;
+        width: 80vw;
+        text-align: left;
+        background-color: rgba(255, 255, 255, 0.4);
+    }
+}
+
+#map-information ul {
+    height: inherit;
+    overflow-y: scroll;
 }
 
 #map-information li {
@@ -45,6 +79,7 @@ main {
 
 #map-information figure {
     width: 100%;
+    box-sizing: border-box;
     padding: 0 0.5rem;
     /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#000000+0,000000+100&0+0,0.05+100 */
     background: -moz-linear-gradient(top, transparent 0%, rgba(0, 0, 0, 0.03) 100%);
@@ -83,6 +118,7 @@ footer {
 
 footer details {
     position: absolute;
+    z-index: 30;
     bottom: 0;
     left: 0;
     border-top: 1px solid white;
