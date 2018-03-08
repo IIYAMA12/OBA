@@ -18,45 +18,9 @@ h2 {
     font-weight: bold;
 }
 
-footer {
+body > header {
     background-color: black;
-    min-height: 2rem;
-    color: white;
-    position: relative;
-}
-
-footer details {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    border-top: 1px solid white;
-    min-height: 1px;
-    transition: min-height 0.5s;
-    background-color: inherit;
-    width: 100%;
-    padding: 1rem;
-}
-
-footer details[open] {
-    min-height: 6rem;
-}
-
-footer details[open] summary {
-    margin-bottom: 0.5rem;
-}
-
-footer ul {
-    padding-left: 1rem;
-}
-
-footer li {
-    list-style-type: square;
-    margin-bottom: 0.5rem;
-    font-weight: lighter;
-}
-
-footer li:last-child {
-    margin-bottom: 0;
+    box-sizing: border-box;
 }
 
 #map-information {
@@ -96,6 +60,47 @@ footer li:last-child {
 }
 
 #map-information p:last-child {
+    margin-bottom: 0;
+}
+
+footer {
+    background-color: black;
+    min-height: 2rem;
+    color: white;
+    position: relative;
+}
+
+footer details {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    border-top: 1px solid white;
+    min-height: 1px;
+    transition: min-height 0.5s;
+    background-color: inherit;
+    width: 100%;
+    padding: 1rem;
+}
+
+footer details[open] {
+    min-height: 6rem;
+}
+
+footer details[open] summary {
+    margin-bottom: 0.5rem;
+}
+
+footer ul {
+    padding-left: 1rem;
+}
+
+footer li {
+    list-style-type: square;
+    margin-bottom: 0.5rem;
+    font-weight: lighter;
+}
+
+footer li:last-child {
     margin-bottom: 0;
 }
 
