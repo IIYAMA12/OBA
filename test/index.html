@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<title>Adamlink SPARQLen met javascript</title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="https://fonts.googleapis.com/css?family=Nunito:700" rel="stylesheet">
+
+	<style type="text/css">
+		body{
+			padding: 40px;
+			text-align: center;
+		}
+		h1{
+			font-family: "Nunito";
+			margin-bottom: 1rem;
+		}
+		img {
+			height: 200px;
+			margin-right: 20px;
+			margin-bottom: 20px;
+			border:5px solid #000;
+		}
+		form {
+			margin-bottom: 1rem;
+		}
+	</style>
+
+
+
+</head>
+<body>
+
+
+	<h1>Fetch and show results from Adamlink SPARQL endpoint with js</h1>
+	<form>
+		<fieldset>
+			<input id="search-on" type="text" name="" value="" placeholder="Search...">
+		</fieldset>
+		<fieldset>
+			<input id="music-radio"type="radio" name="subject" value="Music." checked>
+			<label for="music-radio">Music</label>
+
+			<input id="privacy-radio" type="radio" name="subject" value="Privacy.">
+			<label for="privacy-radio">Privacy</label>
+
+			<input id="pop-music-radio" type="radio" name="subject" value="Pop music.">
+			<label for="pop-music-radio">Pop music</label>
+
+			<input id="squatters-movement-radio" type="radio" name="subject" value="Squatters movement.">
+			<label for="squatters-movement-radio">Squatters movement</label>
+		</fieldset>
+
+	</form>
+	<section>
+		<div id="images"></div>
+		<button type="button" name="more">More</button>
+	</section>
+
+<script>
+	/*
+	const sparqlquery = `
+		PREFIX dc: <http://purl.org/dc/elements/1.1/>
+		PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+		SELECT ?cho ?title ?img WHERE {
+		  ?cho dc:type "japonstof"^^xsd:string .
+		  ?cho dc:title ?title .
+		  ?cho foaf:depiction ?img .
+		}
+		LIMIT 300`;
+	*/
+	const app = {
+		search : {
+			limit : 10,
+			itemsPerRequest : 10,
+			offset : 0,
+			start (reset) {
+				console.log("reset:", reset);
+				const searchInput = document.getElementById('search-on');
+
+				const searchText = searchInput.value;
+				const searchTextSplitted = searchText.split(" ");
+
+				let filterString = "";
+
+				for (let i = 0; i < searchTextSplitted.length; i++) {
+					console.log(searchTextSplitted[i]);
+					let searchTextPart = searchTextSplitted[i].trim();
+
+					if (searchTextPart != "") {
+						searchTextPart = ". FILTER(contains(lcase(?title),\"" + searchTextPart + "\"))";
+						filterString += searchTextPart;
+
+					}
+				}
+				console.log(filterString);
+
+				let subject = "Music.";
+				const subjectElement = document.querySelector("[name=\"subject\"]:checked");
+				if (subjectElement) {
+
+					subject = subjectElement.value;
+				}
+
+
+
+				// 	?types dc:types ?types .
+				const sparqlquery = `
+					PREFIX dc: <http://purl.org/dc/elements/1.1/>
+					PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+					SELECT ?cho ?title ?img WHERE {
+
+						?cho dc:subject '` + subject + `'^^xsd:string .
+			  			?cho dc:title ?title .
+
+			  			?cho foaf:depiction ?img` + (
+
+							filterString != ""
+
+						?
+
+							filterString
+
+						:
+
+							""
+
+						)
+
+					+ `}
+					ORDER BY ?title
+					LIMIT ` + app.search.limit + `OFFSET ` + (app.search.offset);
+
+
+
+				console.log("sparqlquery", sparqlquery);
+
+					// 	?cho dc:type 'herenkostuum'^^xsd:string .
+
+
+					// more fun dc:types: 'affiche', 'japonstof', 'tegel', 'herenkostuum'
+					// more fun dc:subjects with Poster.: 'Privacy.', 'Pop music.', 'Music.', 'Squatters movement.'
+
+				const encodedquery = encodeURI(sparqlquery);
+
+				const queryurl = 'https://api.data.adamlink.nl/datasets/AdamNet/all/services/endpoint/sparql?default-graph-uri=&query=' + encodedquery + '&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on';
+
+				fetch(queryurl)
+				.then((resp) => resp.json()) // transform the data into json
+			  	.then(function(data) {
+
+					const rows = data.results.bindings; // get the results
+					const imgdiv = document.getElementById('images');
+					if (reset) {
+						imgdiv.innerHTML = "";
+					}
+
+					for (i = 0; i < rows.length; ++i) {
+
+					    var img = document.createElement('img');
+					    img.src = rows[i]['img']['value'];
+					    img.title = rows[i]['title']['value'];
+					    imgdiv.appendChild(img);
+
+					}
+				})
+				.catch(function(error) {
+					// if there is any error you will catch them here
+					console.log(error);
+				});
+			}
+		}
+	}
+	app.search.start(true);
+
+	const moreButton  = document.querySelector("[name=\"more\"]");
+
+	moreButton.addEventListener("click",((e) => {
+		app.search.offset += app.search.itemsPerRequest;
+		app.search.start();
+	}));
+
+	const radioButtons = document.querySelectorAll("[name=\"subject\"]");
+	for (let i = 0; i < radioButtons.length; i++) {
+		radioButtons[i].addEventListener("change",((e) => {
+			app.search.offset = 0;
+			app.search.start(true);
+		}));
+	}
+	document.getElementById('search-on').addEventListener("keypress",((e) => {
+		app.search.offset = 0;
+		setTimeout(app.search.start, 0, true);
+	}));
+</script>
+
+
+
+</body>
+</html>
