@@ -282,17 +282,69 @@ window.addEventListener("load", ((e) => {
         // disable double click zoom
         map.element.doubleClickZoom.disable();
 
+        let focusedOnId;
+        let dialogBindings = [];
 
         map.element.on("dblclick", function (e) {
             map.load.data(e.lngLat.lng, e.lngLat.lat);
+            dialogBindings = [];
         });
 
-        let focusedOnId;
+
 
         console.log(map);
-        map.element.on("mousemove", function (e) {
-            console.log("moving layer");
+        // map.element.on("mousemove", function (e) {
+        //     console.log("moving layer");
+        // });
+
+        const showDialog = function (e) {
+
+            const dialogElement = document.querySelector("body > dialog");
+            if (dialogElement != undefined) {
+                const id = this.id;
+                if (id != undefined && id != "") {
+                    const index = Number(id.replace("image-information-", ""));
+                    if (index != undefined) {
+
+                        dialogElement.classList.remove("hidden");
+
+                        const binding = dialogBindings[index];
+                        if (binding != undefined) {
+                            dialogElement.querySelector("img").src = binding.img.value;
+                            dialogElement.querySelector("img").alt = binding.img.value;
+
+                            const figcaption = dialogElement.querySelector("figcaption");
+
+                            figcaption.innerHTML = "";
+
+                            if (binding.creator != undefined && binding.creator.value != undefined) {
+                                const textNode = document.createTextNode("Author: " + binding.creator.value);
+                                const paragraph = document.createElement("p");
+                                paragraph.append(textNode);
+                                figcaption.append(paragraph);
+                            }
+
+                            if (binding.subject != undefined && binding.subject.value != undefined && binding.subject.type != "uri") {
+                                const textNode = document.createTextNode("Subject: " + binding.subject.value);
+                                const paragraph = document.createElement("p");
+                                paragraph.append(textNode);
+                                figcaption.append(paragraph);
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+
+
+        document.querySelector("[name=\"close-dialog\"]").addEventListener("click", function () {
+            const dialogElement = document.querySelector("body > dialog");
+            if (dialogElement != undefined) {
+                dialogElement.classList.add("hidden");
+            }
         });
+
         map.element.on("click", function (e) {
             var features = map.element.queryRenderedFeatures(e.point);
             if (features != undefined && features.length > 0) {
@@ -306,6 +358,7 @@ window.addEventListener("load", ((e) => {
 
                             if (feature.properties.uri != undefined && feature.layer != undefined) {
                                 if (!requestingContent) {
+                                    dialogBindings = [];
                                     requestingContent = true;
 
                                     // do not request for the same layer every cursor movement
@@ -314,9 +367,11 @@ window.addEventListener("load", ((e) => {
                                             map.element.setPaintProperty(focusedOnId, "line-color", "white");
                                         }
 
-                                        focusedOnId = feature.layer.id
+                                        focusedOnId = feature.layer.id;
 
                                         const mapInformationContainer = document.getElementById('map-information');
+
+
                                         mapInformationContainer.innerHTML = "";
                                         map.element.setPaintProperty(feature.layer.id, "line-color", "orange");
 
@@ -354,6 +409,8 @@ window.addEventListener("load", ((e) => {
                                         header.append(streetNameNode);
                                         mapInformationContainer.append(header);
 
+
+
                                         fetch(queryurl)
                                         .then((resp) => resp.json()) // transform the data into json
                                         .then(function(data) {
@@ -363,11 +420,16 @@ window.addEventListener("load", ((e) => {
 
                                                 if (mapInformationContainer != undefined) {
                                                     console.log("mapInformationContainer");
+
+
                                                     if (focusedOnId !== feature.layer.id) {
                                                         map.element.setPaintProperty(feature.layer.id, "line-color", "white");
                                                     } else {
                                                         map.element.setPaintProperty(feature.layer.id, "line-color", "orange");
 
+                                                        if (mapInformationContainer.classList.contains("mobile-information-hidden")) {
+                                                            mapInformationContainer.classList.remove("mobile-information-hidden");
+                                                        }
 
 
 
@@ -375,6 +437,9 @@ window.addEventListener("load", ((e) => {
 
 
                                                         const list = document.createElement("ul");
+
+                                                        // mobile only
+                                                        dialogBindings = bindings;
 
                                                         for (let i = 0; i < bindings.length; i++) {
                                                             const binding = bindings[i];
@@ -395,19 +460,23 @@ window.addEventListener("load", ((e) => {
                                                                 figcaption.append(paragraph);
                                                             }
 
-                                                            if (binding.description != undefined && binding.description.value != undefined) {
-                                                                const textNode = document.createTextNode("Description: " + binding.description.value);
-                                                                const paragraph = document.createElement("p");
-                                                                paragraph.append(textNode);
-                                                                figcaption.append(paragraph);
-                                                            }
-                                                            console.log(binding.subject);
+                                                            // if (binding.description != undefined && binding.description.value != undefined) {
+                                                            //     const textNode = document.createTextNode("Description: " + binding.description.value);
+                                                            //     const paragraph = document.createElement("p");
+                                                            //     paragraph.append(textNode);
+                                                            //     figcaption.append(paragraph);
+                                                            // }
+
                                                             if (binding.subject != undefined && binding.subject.value != undefined && binding.subject.type != "uri") {
                                                                 const textNode = document.createTextNode("Subject: " + binding.subject.value);
                                                                 const paragraph = document.createElement("p");
                                                                 paragraph.append(textNode);
                                                                 figcaption.append(paragraph);
                                                             }
+
+                                                            listItem.setAttribute("id", "image-information-" + i);
+
+                                                            listItem.addEventListener("click", showDialog);
 
                                                             figure.appendChild(image);
                                                             figure.appendChild(figcaption);

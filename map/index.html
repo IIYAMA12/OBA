@@ -14,17 +14,12 @@
 
 <body>
     <header>
-        <h1>Amsterdam - street information</h1>
+        <h1>Bekijk foto's van jouw buurt door de jaren heen</h1>
     </header>
     <main>
         <section >
             <div id="map"></div>
             <footer>
-                <!-- <h2>Controls</h2>
-                <ul>
-                    <li>Click on street for more information</li>
-                    <li>Double click on map to load new area</li>
-                </ul> -->
                 <details>
                     <summary>Controls</summary>
                     <ul>
@@ -34,9 +29,17 @@
                 </details>
             </footer>
         </section>
-        <article id="map-information">
+        <article id="map-information" class="mobile-information-hidden">
+            <!-- <div class="loader"></div> -->
         </article>
     </main>
+    <dialog open="true" class="hidden">
+        <figure>
+            <img src="" alt="">
+            <figcaption></figcaption>
+        </figure>
+        <button type="button" name="close-dialog">Close</button>
+    </dialog>
 </body>
 
 <script src="scripts/index.js"></script>

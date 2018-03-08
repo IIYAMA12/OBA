@@ -26,6 +26,7 @@ body > header {
 main {
     height: calc(100vh - 2rem);
     position: relative;
+    overflow-x: hidden;
 }
 
 @media (min-width: 35rem) {
@@ -53,6 +54,8 @@ main {
         background-color: rgba(255, 255, 255, 0.4);
         height: calc(100vh - 4rem - 1px);
         color: white;
+        transform: translateX(0%);
+        transition: transform 0.3s;
     }
     #map-information figcaption {
         display: none;
@@ -61,16 +64,22 @@ main {
     #map-information h2 {
         box-sizing: border-box;
         position: absolute;
-        right: 100%;
-        width: 80vw;
+        right: calc(100% + 1px);
+        width: calc(80vw - 1px);
         text-align: left;
         background-color: rgba(255, 255, 255, 0.4);
+    }
+    #map-information ul {
+        padding-top: 1rem;
+    }
+    #map-information.mobile-information-hidden {
+        transform: translateX(100%);
     }
 }
 
 #map-information ul {
     height: inherit;
-    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 #map-information li {
@@ -98,6 +107,7 @@ main {
 #map-information h2 {
     padding: 1rem 1rem 0.5rem 0.5rem;
     margin: 0 0 0.5rem 0;
+    color: orange;
 }
 
 #map-information p {
@@ -151,7 +161,35 @@ footer li:last-child {
     margin-bottom: 0;
 }
 
-.mapboxgl-control-container {
+dialog {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    z-index: 50;
+}
+
+@media (min-width: 35rem) {
+    dialog {
+        display: none !important;
+        visibility: hidden !important;
+    }
+}
+
+.loader {
+    width: 5rem;
+    height: 5rem;
+    background: url("../images/loader.svg") 0 0;
+    background-repeat: no-repeat;
+    background-size: cover;
+    animation: loader 1s infinite steps(8);
+}
+
+.mapboxgl-control-container, .hidden {
     display: none !important;
     visibility: hidden !important;
 }
