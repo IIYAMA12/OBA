@@ -335,7 +335,11 @@ window.addEventListener("load", ((e) => {
                 }
             }
         };
-
+        
+        const onImageLoad = function () {
+            this.removeEventListener("load", onImageLoad);
+            this.classList.add("loaded");
+        };
 
 
         document.querySelector("[name=\"close-dialog\"]").addEventListener("click", function () {
@@ -409,11 +413,17 @@ window.addEventListener("load", ((e) => {
                                         header.append(streetNameNode);
                                         mapInformationContainer.append(header);
 
-
+                                        // add loader
+                                        const loader = document.createElement("div");
+                                        loader.classList.add("loader");
+                                        mapInformationContainer.appendChild(loader);
 
                                         fetch(queryurl)
                                         .then((resp) => resp.json()) // transform the data into json
                                         .then(function(data) {
+
+                                            mapInformationContainer.removeChild(loader);
+
                                             const results = data.results;
                                             const bindings = results.bindings;
                                             if (bindings.length > 0) {
@@ -477,6 +487,7 @@ window.addEventListener("load", ((e) => {
                                                             listItem.setAttribute("id", "image-information-" + i);
 
                                                             listItem.addEventListener("click", showDialog);
+                                                            image.addEventListener("load", onImageLoad);
 
                                                             figure.appendChild(image);
                                                             figure.appendChild(figcaption);
@@ -494,6 +505,7 @@ window.addEventListener("load", ((e) => {
                                             }
                                         })
                                         .catch(function(error) {
+                                            mapInformationContainer.removeChild(loader);
                                             map.element.setPaintProperty(feature.layer.id, "line-color", "rgb(150,150,150)");
                                             // if there is any error you will catch them here
                                             console.error(error);

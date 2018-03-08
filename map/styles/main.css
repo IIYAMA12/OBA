@@ -2,13 +2,13 @@ body {
     margin: 0;
     padding: 0;
     font-family: sans-serif;
+    min-height: 100vh;
 }
 
 h1 {
     font-size: 1.3rem;
-    font-weight: lighter;
     line-height: 2rem;
-    margin-left: 1rem;
+    margin: 0 1rem;
 }
 
 h2 {
@@ -16,10 +16,28 @@ h2 {
     font-weight: bold;
 }
 
+button, [type="button"] {
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    padding: 0.75rem;
+}
+
+button:hover, [type="button"]:hover {
+    background-color: orange;
+    color: white;
+}
+
+dialog, button, [type="button"] {
+    border-radius: 3px;
+}
+
+[disabled] {
+    cursor: not-allowed;
+}
+
 body > header {
     background-color: black;
     box-sizing: border-box;
-    height: 2rem;
     color: white;
 }
 
@@ -42,44 +60,24 @@ main {
 }
 
 #map-information {
+    position: relative;
     height: inherit;
 }
 
-@media (max-width: 35rem) {
+@media (min-width: 35rem) {
     #map-information {
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: 20%;
-        background-color: rgba(255, 255, 255, 0.4);
-        height: calc(100vh - 4rem - 1px);
-        color: white;
-        transform: translateX(0%);
-        transition: transform 0.3s;
-    }
-    #map-information figcaption {
-        display: none;
-        visibility: hidden;
-    }
-    #map-information h2 {
-        box-sizing: border-box;
-        position: absolute;
-        right: calc(100% + 1px);
-        width: calc(80vw - 1px);
-        text-align: left;
-        background-color: rgba(255, 255, 255, 0.4);
-    }
-    #map-information ul {
-        padding-top: 1rem;
-    }
-    #map-information.mobile-information-hidden {
-        transform: translateX(100%);
+        overflow-x: hidden;
     }
 }
 
 #map-information ul {
     height: inherit;
-    overflow-x: hidden;
+}
+
+@media (max-width: 35rem) {
+    #map-information ul {
+        overflow-x: hidden;
+    }
 }
 
 #map-information li {
@@ -104,10 +102,29 @@ main {
     width: inherit;
 }
 
+#map-information img:not(.loaded) {
+    background: url("../images/image-loader.gif") 0 0;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-size: 5rem;
+    height: 7rem;
+    display: block;
+    color: transparent;
+}
+
+@media (max-width: 35rem) {
+    #map-information img:not(.loaded) {
+        background-size: 3rem;
+    }
+}
+
 #map-information h2 {
-    padding: 1rem 1rem 0.5rem 0.5rem;
+    padding: 1rem;
     margin: 0 0 0.5rem 0;
-    color: orange;
+    color: white;
+    background-color: orange;
+    box-shadow: 0px 3px 3px 0px rgba(0, 0, 0, 0.1);
 }
 
 #map-information p {
@@ -119,11 +136,55 @@ main {
     margin-bottom: 0;
 }
 
+@media (max-width: 35rem) {
+    #map-information {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 20%;
+        background-color: rgba(255, 255, 255, 0.4);
+        height: calc(100vh - 4rem - 1px);
+        color: white;
+        transform: translateX(0%);
+        transition: transform 0.3s;
+    }
+    #map-information figcaption {
+        display: none;
+        visibility: hidden;
+    }
+    #map-information h2 {
+        box-sizing: border-box;
+        position: absolute;
+        right: 100%;
+        width: 80vw;
+        text-align: left;
+    }
+    #map-information ul {
+        padding-top: 1rem;
+    }
+    #map-information li {
+        cursor: pointer;
+    }
+    #map-information.mobile-information-hidden {
+        transform: translateX(100%);
+    }
+}
+
 footer {
     background-color: black;
     min-height: 2rem;
     color: white;
     position: relative;
+}
+
+@media (max-width: 35rem) {
+    footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100vw;
+        z-index: 100;
+    }
 }
 
 footer details {
@@ -162,15 +223,44 @@ footer li:last-child {
 }
 
 dialog {
-    position: absolute;
-    width: 100vw;
-    height: 100vh;
-    top: 0;
-    left: 0;
+    position: fixed;
+    width: calc(100vw - 10vmin);
+    max-height: calc(100vh - 10vmin);
+    top: 5vmin;
+    left: 5vmin;
     margin: 0;
-    padding: 0;
+    padding: 1rem 1rem 0 1rem;
     box-sizing: border-box;
-    z-index: 50;
+    z-index: 120;
+    overflow-y: scroll;
+    border: 0;
+    box-shadow: 0 0 0 70vmax rgba(0, 0, 0, 0.8);
+    display: block;
+}
+
+dialog img {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+dialog p {
+    margin-bottom: 1rem;
+}
+
+dialog p:last-child {
+    margin-bottom: 0;
+}
+
+dialog button {
+    margin: 1rem 0 1rem 50%;
+    transform: translateX(-50%);
+    box-sizing: border-box;
+    min-height: 2rem;
+    line-height: 1rem;
+    border: none;
+    background-color: black;
+    color: white;
+    font-size: 1rem;
 }
 
 @media (min-width: 35rem) {
@@ -180,13 +270,24 @@ dialog {
     }
 }
 
+@keyframes loader {
+    to {
+        background-position: -40rem 0;
+    }
+}
+
 .loader {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     width: 5rem;
     height: 5rem;
     background: url("../images/loader.svg") 0 0;
     background-repeat: no-repeat;
     background-size: cover;
-    animation: loader 1s infinite steps(8);
+    animation: loader 0.7s infinite steps(8);
+    border-radius: 1rem;
 }
 
 .mapboxgl-control-container, .hidden {
