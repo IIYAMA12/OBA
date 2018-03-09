@@ -314,10 +314,9 @@ window.addEventListener("load", ((e) => {
                     const index = Number(id.replace("image-information-", ""));
                     if (index != undefined) {
 
-                        dialogElement.classList.remove("hidden");
-
                         const binding = dialogBindings[index];
                         if (binding != undefined) {
+                            dialogElement.classList.remove("hidden");
                             dialogElement.querySelector("img").src = binding.img.value;
                             dialogElement.querySelector("img").alt = binding.img.value;
 
@@ -446,6 +445,15 @@ window.addEventListener("load", ((e) => {
                                             mapInformationContainer.appendChild(timeContainer);
                                         }
 
+                                        if (mapInformationContainer.classList.contains("mobile-information-hidden")) {
+                                            mapInformationContainer.classList.remove("mobile-information-hidden");
+                                        }
+
+                                        // for mobile move search input
+                                        const searchBarContainer = document.querySelector('.mapboxgl-ctrl-geocoder');
+                                        if (!searchBarContainer.classList.contains("information-box-open")) {
+                                            searchBarContainer.classList.add("information-box-open");
+                                        }
 
                                         // add loader
                                         const loader = document.createElement("div");
@@ -471,13 +479,8 @@ window.addEventListener("load", ((e) => {
                                                     } else {
                                                         map.element.setPaintProperty(feature.layer.id, "line-color", "orange");
 
-                                                        if (mapInformationContainer.classList.contains("mobile-information-hidden")) {
-                                                            mapInformationContainer.classList.remove("mobile-information-hidden");
-                                                        }
-                                                        const searchBarContainer = document.querySelector('.mapboxgl-ctrl-geocoder');
-                                                        if (!searchBarContainer.classList.contains("information-box-open")) {
-                                                            searchBarContainer.classList.add("information-box-open");
-                                                        }
+
+
 
 
 
