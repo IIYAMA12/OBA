@@ -25,7 +25,7 @@ const app = {
                     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
-                    SELECT DISTINCT ?street ?size ?streetgeom ?streetName  WHERE {
+                    SELECT DISTINCT ?street ?size ?streetgeom ?streetName ?hasEarliestBeginTimeStamp  WHERE {
                         ?street rdf:type hg:Street .
                         ?street geo:hasGeometry/geo:asWKT ?wkt .
                         ?street <http://www.w3.org/2000/01/rdf-schema#label> ?streetName .
@@ -37,9 +37,14 @@ const app = {
                         BIND(bif:st_get_bounding_box(?streetgeom) as ?boundingBox ) .
                         BIND(((bif:ST_XMax (?boundingBox) - bif:ST_XMin(?boundingBox)) + (bif:ST_YMax (?boundingBox) - bif:ST_YMin(?boundingBox)))  as ?size) .
 
+                        OPTIONAL {
+                            ?street <http://semanticweb.cs.vu.nl/2009/11/sem/hasEarliestBeginTimeStamp> ?hasEarliestBeginTimeStamp .
+                        } .
 
 
                         FILTER (bif:st_may_intersect (?point, ?streetgeom, 0.006)) .
+
+
 
                     }
                     ORDER BY (?size)
@@ -85,8 +90,11 @@ const app = {
                     // style: 'mapbox://styles/mapbox/dark-v9',
                     style: "mapbox://styles/iiyama/cjehnbdnk33n52rqwj0q1xtkj",
                     center: [4.899431, 52.379189],
-                    zoom: 12
-                })
+                    zoom: 14
+                });
+                app.map.element.addControl(new MapboxGeocoder({
+                    accessToken: mapboxgl.accessToken
+                }));
             }
         },
 
@@ -102,7 +110,7 @@ const app = {
             });
 
             bindings = bindings.filter(function (d) {
-                return d.size.value < 0.003;
+                return d.size.value < 0.006;
             });
 
             results.bindings = bindings;
@@ -236,6 +244,12 @@ const app = {
                                 dynamicObjects.properties.uri = binding.street; //
                             }
 
+                            if (binding.hasEarliestBeginTimeStamp != undefined)  {
+
+                                dynamicObjects.properties.hasEarliestBeginTimeStamp = binding.hasEarliestBeginTimeStamp; //
+                            }
+
+
 
 
                             ///////////////
@@ -291,12 +305,6 @@ window.addEventListener("load", ((e) => {
         });
 
 
-
-        console.log(map);
-        // map.element.on("mousemove", function (e) {
-        //     console.log("moving layer");
-        // });
-
         const showDialog = function (e) {
 
             const dialogElement = document.querySelector("body > dialog");
@@ -330,12 +338,19 @@ window.addEventListener("load", ((e) => {
                                 paragraph.append(textNode);
                                 figcaption.append(paragraph);
                             }
+
+                            if (binding.startYear != undefined && binding.startYear.value != undefined && binding.subject.type != "uri") {
+                                const textNode = document.createTextNode("Genomen op: " + binding.startYear.value);
+                                const paragraph = document.createElement("p");
+                                paragraph.append(textNode);
+                                figcaption.append(paragraph);
+                            }
                         }
                     }
                 }
             }
         };
-        
+
         const onImageLoad = function () {
             this.removeEventListener("load", onImageLoad);
             this.classList.add("loaded");
@@ -379,14 +394,13 @@ window.addEventListener("load", ((e) => {
                                         mapInformationContainer.innerHTML = "";
                                         map.element.setPaintProperty(feature.layer.id, "line-color", "orange");
 
-                                        console.log("feature found", feature);
 
 
                                         const sparqlquery = `
                                             PREFIX dct: <http://purl.org/dc/terms/>
                                             PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
-                                            SELECT ?item ?img ?creator ?subject WHERE {
+                                            SELECT ?item ?img ?creator ?subject ?startYear WHERE {
                                                 ?item dct:spatial <` + JSON.parse(feature.properties.uri).value + `>  .
                                                 ?item foaf:depiction ?img .
                                                 optional {
@@ -398,8 +412,13 @@ window.addEventListener("load", ((e) => {
                                                 optional {
                                                     ?item <http://purl.org/dc/elements/1.1/subject> ?subject .
                                                 }
+                                                optional {
+                                                    ?item <http://semanticweb.cs.vu.nl/2009/11/sem/hasBeginTimeStamp> ?startYear .
+                                                }
                                             }
+                                            ORDER BY DESC(?startYear)
                                             LIMIT 100
+
                                         `;
 
 
@@ -410,8 +429,23 @@ window.addEventListener("load", ((e) => {
                                         const headerTitle = JSON.parse(feature.properties.streetName).value;
                                         const streetNameNode = document.createTextNode(headerTitle);
                                         const header = document.createElement("h2");
-                                        header.append(streetNameNode);
-                                        mapInformationContainer.append(header);
+                                        header.appendChild(streetNameNode);
+                                        mapInformationContainer.appendChild(header);
+
+
+                                        if (feature.properties.hasEarliestBeginTimeStamp != undefined) {
+                                            const hasEarliestBeginTimeStamp = JSON.parse(feature.properties.hasEarliestBeginTimeStamp).value;
+                                            const timeElement = document.createElement("time");
+                                            const time = document.createTextNode("Startjaar: " + hasEarliestBeginTimeStamp);
+                                            timeElement.appendChild(time);
+
+                                            const timeContainer = document.createElement("p");
+                                            timeContainer.setAttribute("id", "begin-street-year");
+                                            timeContainer.appendChild(timeElement)
+
+                                            mapInformationContainer.appendChild(timeContainer);
+                                        }
+
 
                                         // add loader
                                         const loader = document.createElement("div");
@@ -440,6 +474,10 @@ window.addEventListener("load", ((e) => {
                                                         if (mapInformationContainer.classList.contains("mobile-information-hidden")) {
                                                             mapInformationContainer.classList.remove("mobile-information-hidden");
                                                         }
+                                                        const searchBarContainer = document.querySelector('.mapboxgl-ctrl-geocoder');
+                                                        if (!searchBarContainer.classList.contains("information-box-open")) {
+                                                            searchBarContainer.classList.add("information-box-open");
+                                                        }
 
 
 
@@ -464,25 +502,29 @@ window.addEventListener("load", ((e) => {
                                                             // console.log("CHECK THIS", binding.item.value);
                                                             const figcaption = document.createElement("figcaption");
                                                             if (binding.creator != undefined && binding.creator.value != undefined) {
-                                                                const textNode = document.createTextNode("Author: " + binding.creator.value);
+                                                                const textNode = document.createTextNode("Auteur: " + binding.creator.value);
                                                                 const paragraph = document.createElement("p");
                                                                 paragraph.append(textNode);
                                                                 figcaption.append(paragraph);
                                                             }
 
-                                                            // if (binding.description != undefined && binding.description.value != undefined) {
-                                                            //     const textNode = document.createTextNode("Description: " + binding.description.value);
-                                                            //     const paragraph = document.createElement("p");
-                                                            //     paragraph.append(textNode);
-                                                            //     figcaption.append(paragraph);
-                                                            // }
 
                                                             if (binding.subject != undefined && binding.subject.value != undefined && binding.subject.type != "uri") {
-                                                                const textNode = document.createTextNode("Subject: " + binding.subject.value);
+                                                                const textNode = document.createTextNode("Onderwerp: " + binding.subject.value);
                                                                 const paragraph = document.createElement("p");
                                                                 paragraph.append(textNode);
                                                                 figcaption.append(paragraph);
                                                             }
+                                                            // console.log(binding.hasEarliestBeginTimeStamp);
+                                                            //
+                                                            if (binding.startYear != undefined && binding.startYear.value != undefined && binding.subject.type != "uri") {
+                                                                const textNode = document.createTextNode("Genomen op: " + binding.startYear.value);
+                                                                const paragraph = document.createElement("p");
+                                                                paragraph.append(textNode);
+                                                                figcaption.append(paragraph);
+                                                            }
+
+
 
                                                             listItem.setAttribute("id", "image-information-" + i);
 
@@ -513,7 +555,6 @@ window.addEventListener("load", ((e) => {
                                     }
                                 }
                             } else if (feature.layer != undefined) {
-                                console.log("set disabled");
                                 map.element.setPaintProperty(feature.layer.id, "line-color", "rgb(150,150,150)");
                             }
                         } else {
@@ -523,9 +564,6 @@ window.addEventListener("load", ((e) => {
                 }
 
             }
-
-
-            // console.log(JSON.stringify(features, null, 2));
         });
 
         // https://www.mapbox.com/mapbox-gl-js/example/queryrenderedfeatures/
@@ -533,37 +571,3 @@ window.addEventListener("load", ((e) => {
         console.error("Can't find mapboxgl");
     }
 }));
-
-
-/*
-PREFIX dc: <http://purl.org/dc/elements/1.1/>
-PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-PREFIX hg: <http://rdf.histograph.io/>
-PREFIX geo: <http://www.opengis.net/ont/geosparql#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-
-SELECT DISTINCT ?s ?size ?streetgeom  WHERE {
-    ?s rdf:type hg:Street .
-    ?s geo:hasGeometry/geo:asWKT ?wkt .
-
-    bind (bif:st_geomfromtext("POINT(4.921534 52.358119)") as ?point) .
-
-
-    bind (bif:st_geomfromtext(?wkt) as ?streetgeom) .
-
-    FILTER (!REGEX(?wkt, 'Array')) .
-
-    bind(bif:st_get_bounding_box(?streetgeom) as ?boundingBox ) .
-    bind(((bif:ST_XMax (?boundingBox) - bif:ST_XMin(?boundingBox)) + (bif:ST_YMax (?boundingBox) - bif:ST_YMin(?boundingBox)))  as ?size) .
-
-    FILTER(?size < "0.1"^^xsd:double) .
-    FILTER(?size > "0.0003"^^xsd:double) .
-
-    FILTER (bif:st_may_intersect (?point, ?streetgeom)) .
-
-}
-ORDER BY (?size)
-LIMIT 1000
-*/

@@ -9,6 +9,8 @@
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css' rel='stylesheet' />
     <link rel="stylesheet" href="styles/reset.css" />
     <link rel="stylesheet" href="styles/main.css" />
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.2.0/mapbox-gl-geocoder.min.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.2.0/mapbox-gl-geocoder.css' type='text/css' />
 
 </head>
 
@@ -21,16 +23,15 @@
             <div id="map"></div>
             <footer>
                 <details>
-                    <summary>Besturing</summary>
+                    <summary>Bediening</summary>
                     <ul>
-                        <li>Klik / Tap op een straat voor meer informaties.</li>
+                        <li>Klik / Tap op een straat voor meer informatie.</li>
                         <li>Dubbelklik / Dubbeltap op de kaart om een nieuw gebied in te laden.</li>
                     </ul>
                 </details>
             </footer>
         </section>
         <article id="map-information" class="mobile-information-hidden">
-            <!-- <div class="loader"></div> -->
         </article>
     </main>
     <dialog open="true" class="hidden">
@@ -40,117 +41,12 @@
         </figure>
         <button type="button" name="close-dialog">Close</button>
     </dialog>
-    <!-- <div id="main-zero-state"></div> -->
+    <div id="main-zero-state">
+        <img id="zerostate-controls" src="images/zerostate-controls.svg" alt="Controls">
+        <img id="zerostate-photos1" src="images/zerostate-photos1.svg" alt="Foto's">
+        <img id="zerostate-title" src="images/zerostate-title.svg" alt="Bekijk foto's van jouw buurt door de jaren heen!">
+    </div>
 </body>
 
 <script src="scripts/index.js"></script>
 </html>
-<!--
-PREFIX dc: <http://purl.org/dc/elements/1.1/>
-PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-PREFIX hg: <http://rdf.histograph.io/>
-PREFIX geo: <http://www.opengis.net/ont/geosparql#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-
-#    SELECT DISTINCT * WHERE {
-#		?cho dc:type "tekening"^^xsd:string .
-#		#		?cho dc:type ?type .
-#		?cho dc:subject ?subjects .
-#		?cho dc:title ?title .
-#		?cho foaf:depiction ?img .
-#  		BIND (DATATYPE(?subjects) AS ?thisDataType) .
-#		FILTER(CONTAINS((xsd:string(?subjects)), "t") )
-#}
-#	ORDER BY ?title
-#
-#
-
-
-
-#SELECT * WHERE {
-#  <http://beeldbank.amsterdam.nl/afbeelding/000291000080> ?p ?o.
-#}
-
-
-#SELECT * WHERE {
-#  ?s skos:prefLabel ?o.
-#}
-
-
-#SELECT * WHERE {
-#  <https://adamlink.nl/person/a-radius/2662> ?p ?o.
-#}
-
-
-
-#SELECT ?image ?s WHERE {
-#	?s <http://purl.org/dc/elements/1.1/date> ?date .
-#	?s foaf:depiction ?image .
-#  FILTER(CONTAINS(?date, "1805"))
-#}
-
-#SELECT * WHERE {
-#  <http://beeldbank.amsterdam.nl/afbeelding/000291000076> ?p ?o .
-#}
-
-#SELECT * WHERE {
-#  ?s <http://purl.org/dc/elements/1.1/creator> ?o .
-#  ?s ?p ?o2
-#}
-
-
-#SELECT * WHERE {
-#	?s dc:rights ?o .
-#}
-
-#SELECT * WHERE {
-#  ?s dc: ?o .
-#}
-
-#SELECT * WHERE {
-#  ?s hg: ?o .
-#}
-#
-
-#SELECT * WHERE {
-#  ?s skos:prefLabel ?author1.
-#  OPTIONAL {
-#    ?s <http://purl.org/dc/elements/1.1/creator> ?author2 .
-#  }
-#}
-
-#SELECT ?street ?streetname ?wkt WHERE {
-#  ?street a hg:Street .
-#  ?street skos:prefLabel ?streetname .
-#  ?street geo:hasGeometry/geo:asWKT ?wkt .
-#  bind (bif:st_geomfromtext("POINT(4.921534 52.358119)") as ?point) .
-#  bind (bif:st_geomfromtext(?wkt) as ?streetgeom) .
-#  FILTER (!REGEX(?wkt, 'Array')) . # found a street with invalid geometry
-#  FILTER (bif:st_may_intersect (?point, ?streetgeom))
-#}
-
-SELECT DISTINCT ?s ?size ?streetgeom  WHERE {
-  	?s rdf:type hg:Street .
-	?s geo:hasGeometry/geo:asWKT ?wkt .
-	bind (bif:st_geomfromtext("POINT(4.921534 52.358119)") as ?point) .
-	bind (bif:st_geomfromtext(?wkt) as ?streetgeom) .
-  	FILTER (!REGEX(?wkt, 'Array')) .
-  bind(bif:st_get_bounding_box(?streetgeom) as ?boundingBox ) .
-  bind(((bif:ST_XMax (?boundingBox) - bif:ST_XMin(?boundingBox)) + (bif:ST_YMax (?boundingBox) - bif:ST_YMin(?boundingBox)))  as ?size) .
-  FILTER(?size < "0.0006"^^xsd:double) .
-  FILTER(?size > "0.0003"^^xsd:double)
-}
-ORDER BY (?size)
-#ORDER BY bif:st_distance (bif:st_point(bif:st_x(?point), bif:st_y(?point)), bif:st_point(bif:st_x(?streetgeom), bif:st_y(?point)))
-
-
-#SELECT * WHERE {
-#  	?street rdf:type hg:Street .
-#	?street skos:prefLabel ?prefname .
-#  	?street sem:hasEarliestBeginTimeStamp ?year .
-#}
-#
-LIMIT 1000
--->

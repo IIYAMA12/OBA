@@ -22,8 +22,11 @@ h2 {
     font-weight: bold;
 }
 
-button, [type="button"] {
+details, button, [type="button"] {
     cursor: pointer;
+}
+
+button, [type="button"] {
     transition: background-color 0.3s, color 0.3s;
     &:hover {
         background-color: orange;
@@ -305,7 +308,101 @@ dialog {
 }
 
 
-.mapboxgl-control-container, .hidden {
+.mapboxgl-control-container > *:not(.mapboxgl-ctrl-top-right), .hidden {
     display: none!important;
     visibility: hidden!important;
+}
+
+
+.mapboxgl-ctrl-geocoder {
+    &.information-box-open {
+        @media (max-width: 35rem) {
+            top: 3rem;
+            right: 20vw;
+        }
+    }
+}
+
+@keyframes zerostate-component-fadein {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes zerostate-fadeout {
+    0% {
+        opacity: 1;
+        visibility: visible;
+    }
+    70% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+#begin-street-year {
+    font-weight: bold;
+}
+
+#main-zero-state {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.8);
+    z-index: 200;
+    opacity: 0;
+    visibility: hidden;
+
+
+    animation: zerostate-fadeout 7s;
+    pointer-events: none;
+
+    @media (max-width: 35rem) {
+        display: none!important;
+        visibility: hidden!important;
+    }
+}
+
+
+#main-zero-state * {
+    position: absolute;
+    display: block;
+}
+
+#zerostate-controls, #zerostate-photos1 {
+    width: 25rem;
+}
+
+
+
+
+
+#zerostate-title {
+    top: 50vh;
+    transform: translateY(-50%);
+    width: 90vw;
+    left: 5vw;
+}
+
+#zerostate-controls {
+
+    bottom: 3rem;
+    left: 0;
+    animation: zerostate-component-fadein 2s;
+}
+
+#zerostate-photos1 {
+    right: 0;
+    bottom: 3rem;
+    animation: zerostate-component-fadein 2s;
 }
