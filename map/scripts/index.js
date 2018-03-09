@@ -286,7 +286,8 @@ window.addEventListener("load", ((e) => {
     console.log("loaded");
     if (mapboxgl != undefined) {
         app.init();
-        app.map.load.data(4.899431, 52.379189);
+        const initialMapPoint = [4.899431, 52.379189];
+        app.map.load.data(initialMapPoint[0], initialMapPoint[1]);
 
 
 
@@ -363,8 +364,8 @@ window.addEventListener("load", ((e) => {
             }
         });
 
-        map.element.on("click", function (e) {
-            var features = map.element.queryRenderedFeatures(e.point);
+        const setMapInformationFromPoint = function (point) {
+            var features = map.element.queryRenderedFeatures(point);
             if (features != undefined && features.length > 0) {
 
                 let requestingContent = false;
@@ -556,6 +557,7 @@ window.addEventListener("load", ((e) => {
                                             console.error(error);
                                         });
                                     }
+                                    return true; // experimental return
                                 }
                             } else if (feature.layer != undefined) {
                                 map.element.setPaintProperty(feature.layer.id, "line-color", "rgb(150,150,150)");
@@ -565,8 +567,26 @@ window.addEventListener("load", ((e) => {
                         }
                     }
                 }
-
             }
+            return false;
+        };
+
+        (function () {
+            setTimeout(function () {
+                if (focusedOnId == undefined) {
+                    console.log("use fake point");
+                    const fakePointData = [[initialMapPoint[0] - 1000, initialMapPoint[1] - 1000], [initialMapPoint[0] + 1000, initialMapPoint[1] + 1000]];
+                    // const features = map.queryRenderedFeatures(fakePointData);
+                    setMapInformationFromPoint(fakePointData);
+                }
+            }, 9000)
+
+        }) ();
+
+
+
+        map.element.on("click", function (e) {
+            setMapInformationFromPoint(e.point);
         });
 
         // https://www.mapbox.com/mapbox-gl-js/example/queryrenderedfeatures/
