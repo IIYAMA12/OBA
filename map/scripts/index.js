@@ -17,12 +17,8 @@ const app = {
                 // sprankelende query !!! //
 
                 const sparqlquery = `
-                    PREFIX dc: <http://purl.org/dc/elements/1.1/>
-                    PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/>
-                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                     PREFIX hg: <http://rdf.histograph.io/>
                     PREFIX geo: <http://www.opengis.net/ont/geosparql#>
-                    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
                     SELECT DISTINCT ?street ?size ?streetgeom ?streetName ?hasEarliestBeginTimeStamp  WHERE {
