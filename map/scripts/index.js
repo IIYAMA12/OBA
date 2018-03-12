@@ -17,12 +17,8 @@ const app = {
                 // sprankelende query !!! //
 
                 const sparqlquery = `
-                    PREFIX dc: <http://purl.org/dc/elements/1.1/>
-                    PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/>
-                    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                     PREFIX hg: <http://rdf.histograph.io/>
                     PREFIX geo: <http://www.opengis.net/ont/geosparql#>
-                    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
                     SELECT DISTINCT ?street ?size ?streetgeom ?streetName ?hasEarliestBeginTimeStamp  WHERE {
@@ -286,7 +282,8 @@ window.addEventListener("load", ((e) => {
     console.log("loaded");
     if (mapboxgl != undefined) {
         app.init();
-        app.map.load.data(4.899431, 52.379189);
+        const initialMapPoint = [4.899431, 52.379189];
+        app.map.load.data(initialMapPoint[0], initialMapPoint[1]);
 
 
 
@@ -314,10 +311,9 @@ window.addEventListener("load", ((e) => {
                     const index = Number(id.replace("image-information-", ""));
                     if (index != undefined) {
 
-                        dialogElement.classList.remove("hidden");
-
                         const binding = dialogBindings[index];
                         if (binding != undefined) {
+                            dialogElement.classList.remove("hidden");
                             dialogElement.querySelector("img").src = binding.img.value;
                             dialogElement.querySelector("img").alt = binding.img.value;
 
@@ -364,8 +360,8 @@ window.addEventListener("load", ((e) => {
             }
         });
 
-        map.element.on("click", function (e) {
-            var features = map.element.queryRenderedFeatures(e.point);
+        const setMapInformationFromPoint = function (point) {
+            var features = map.element.queryRenderedFeatures(point);
             if (features != undefined && features.length > 0) {
 
                 let requestingContent = false;
@@ -446,6 +442,15 @@ window.addEventListener("load", ((e) => {
                                             mapInformationContainer.appendChild(timeContainer);
                                         }
 
+                                        if (mapInformationContainer.classList.contains("mobile-information-hidden")) {
+                                            mapInformationContainer.classList.remove("mobile-information-hidden");
+                                        }
+
+                                        // for mobile move search input
+                                        const searchBarContainer = document.querySelector('.mapboxgl-ctrl-geocoder');
+                                        if (!searchBarContainer.classList.contains("information-box-open")) {
+                                            searchBarContainer.classList.add("information-box-open");
+                                        }
 
                                         // add loader
                                         const loader = document.createElement("div");
@@ -471,13 +476,8 @@ window.addEventListener("load", ((e) => {
                                                     } else {
                                                         map.element.setPaintProperty(feature.layer.id, "line-color", "orange");
 
-                                                        if (mapInformationContainer.classList.contains("mobile-information-hidden")) {
-                                                            mapInformationContainer.classList.remove("mobile-information-hidden");
-                                                        }
-                                                        const searchBarContainer = document.querySelector('.mapboxgl-ctrl-geocoder');
-                                                        if (!searchBarContainer.classList.contains("information-box-open")) {
-                                                            searchBarContainer.classList.add("information-box-open");
-                                                        }
+
+
 
 
 
@@ -553,6 +553,7 @@ window.addEventListener("load", ((e) => {
                                             console.error(error);
                                         });
                                     }
+                                    return true; // experimental return
                                 }
                             } else if (feature.layer != undefined) {
                                 map.element.setPaintProperty(feature.layer.id, "line-color", "rgb(150,150,150)");
@@ -562,8 +563,26 @@ window.addEventListener("load", ((e) => {
                         }
                     }
                 }
-
             }
+            return false;
+        };
+
+        (function () {
+            setTimeout(function () {
+                if (focusedOnId == undefined) {
+                    console.log("use fake point");
+                    const fakePointData = [[initialMapPoint[0] - 1000, initialMapPoint[1] - 1000], [initialMapPoint[0] + 1000, initialMapPoint[1] + 1000]];
+                    // const features = map.queryRenderedFeatures(fakePointData);
+                    setMapInformationFromPoint(fakePointData);
+                }
+            }, 9000)
+
+        }) ();
+
+
+
+        map.element.on("click", function (e) {
+            setMapInformationFromPoint(e.point);
         });
 
         // https://www.mapbox.com/mapbox-gl-js/example/queryrenderedfeatures/
